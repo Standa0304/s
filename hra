@@ -1,11 +1,36 @@
+import pygame
+import sys
+import os
+import random
+from pygame import mixer
+
+pygame.init()
+screen = pygame.display.set_mode((800, 600))
+pygame.display.set_caption("Bubble blast")
+background = pygame.image.load('background.png').convert()
+icon = pygame.image.load('icon.png')
 pygame.display.set_icon(icon)
 
 # Hráč
-player = pygame.image.load("ufo.png")
+player = pygame.image.load('player.png')
 playerX = 370
-playerY = 480
-changeX = 0
+playerY = 536
+p_changeX = 0
 
+# Balonek
+balon = pygame.image.load('enemy.png')
+balonX = random.randint(0, 736)
+balonY = 0
+b_changeX = 0.3
+b_changeY = 0.3
+pocet_balon = 0  # Zatim nepotřebné potom uděláme seznam a do něho to nahážeme ať máme více balonku
+
+# Koule ;)
+koule = pygame.image.load('koule.png')
+kouleX = 0
+kouleY = 536
+k_changeY = 1
+nabito = "ready"
 
 
 # Funkce
@@ -13,36 +38,74 @@ def player_move(x, y):
     screen.blit(player, (x, y))
 
 
+def enemy(x,y):
+    screen.blit(balon, (x,y))
+
+
+def fire_koule(x, y):
+    global nabito
+    nabito = "fire"
+    screen.blit(koule, (x, y))
+
 
 # Smyčka
 running = True
 while running:
 
     screen.fill((0, 0, 0))
+    screen.blit(background, (0, 0))
     # Vstupy hráče
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                running = False
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                changeX = -2
+                p_changeX = -0.3
             if event.key == pygame.K_RIGHT:
-                changeX = 2
+                p_changeX = 0.3
+            if event.key == pygame.K_SPACE:
+                if nabito == "ready":
+                    kouleX = playerX
+                    fire_koule(kouleX, kouleY)
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                changeX = 0
+                p_changeX = 0
 
+    # Balon
+    balonX += b_changeX
+    balonY += b_changeY
+    if balonX >= 736:
+        b_changeX = -0.3
+    if balonX <= 0:
+        b_changeX = 0.3
+    if balonY >= 536:
+        b_changeY = - 0.3
+    if balonY <= 0:
+        b_changeY = 0.3
 
     # Pohyb
-    playerX += changeX
-    if playerX >= 736:
+    playerX += p_changeX
+    if playerX > 736:
         playerX = 736
-    if playerX <=0:
+    if playerX < 0:
         playerX = 0
 
+    # Strelba
+    if kouleY <= 0:
+        kouleY = 536
+        nabito = "ready"
+    if nabito == "fire":
+        fire_koule(kouleX, kouleY)
+        kouleY -= k_changeY
+
     # Volání funkcí
-    player(playerX, playerY)
+    player_move(playerX, playerY)
+    enemy(balonX, balonY)
     # Update obrazovky
     pygame.display.update()
+
