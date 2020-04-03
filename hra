@@ -2,14 +2,23 @@ import pygame
 import sys
 import os
 import random
+import math
+from pygame.locals import *
 from pygame import mixer
 
 pygame.init()
+
+# Obrazovka
 screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Bubble blast")
 background = pygame.image.load('background.png').convert()
 icon = pygame.image.load('icon.png')
 pygame.display.set_icon(icon)
+
+# Text
+font = pygame.font.Font('Blackbird.ttf', 20)
+over_font = pygame.font.Font('Blackbird.ttf', 70)
+celkove_font = pygame.font.Font('Blackbird.ttf', 40)
 
 # Hráč
 player = pygame.image.load('player.png')
@@ -29,8 +38,11 @@ pocet_balon = 0  # Zatim nepotřebné potom uděláme seznam a do něho to nahá
 koule = pygame.image.load('koule.png')
 kouleX = 0
 kouleY = 536
-k_changeY = 1
+k_changeY = 1.5
 nabito = "ready"
+
+# Skore
+skore = 0
 
 
 # Funkce
@@ -38,14 +50,42 @@ def player_move(x, y):
     screen.blit(player, (x, y))
 
 
-def enemy(x,y):
-    screen.blit(balon, (x,y))
+def enemy(x, y):
+    screen.blit(balon, (x, y))
 
 
 def fire_koule(x, y):
     global nabito
     nabito = "fire"
     screen.blit(koule, (x, y))
+
+
+def konec_hry_text(skore):
+    over_text = over_font.render("GAME OVER", True, (255, 255, 255))
+    celkove_skore_text = celkove_font.render("Celkove skore: " + str(skore), True, (255, 255, 255))
+    screen.blit(over_text, (200, 250))
+    screen.blit(celkove_skore_text, (300, 320))
+
+
+def kolize_koule(balonX, balonY, kouleX, kouleY):
+    vzdalenost = math.sqrt((math.pow(balonX - kouleX, 2)) + (math.pow(balonY - kouleY, 2)))
+    if vzdalenost < 27:
+        return True
+    else:
+        return False
+
+
+def kolize_hrace(balonX, balonY, playerX, playerY):
+    vzdalenost = math.sqrt((math.pow(balonX - playerX, 2)) + (math.pow(balonY - playerY, 2)))
+    if vzdalenost < 40:
+        return True
+    else:
+        return False
+
+
+def vypis_skrore(x, y):
+    skore_text = font.render("Skore: " + str(skore), True, (255, 255, 255))
+    screen.blit(skore_text, (x, y))
 
 
 # Smyčka
@@ -103,9 +143,24 @@ while running:
         fire_koule(kouleX, kouleY)
         kouleY -= k_changeY
 
+    # Kolize
+    koule_kolize = kolize_koule(balonX, balonY, kouleX, kouleY)
+    if koule_kolize:
+        kouleY = 480
+        nabito = "ready"
+        skore += 1
+        balonX = random.randint(0, 735)
+        balonY = 0
+    hrac_kolize = kolize_hrace(balonX, balonY, playerX, playerY)
+    if hrac_kolize:
+        balonY = playerY
+        balonX = playerX
+        konec_hry_text(skore)
+        nabito = "konec"
+
     # Volání funkcí
     player_move(playerX, playerY)
     enemy(balonX, balonY)
+    vypis_skrore(10, 10)
     # Update obrazovky
     pygame.display.update()
-
