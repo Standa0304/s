@@ -3,22 +3,27 @@ import sys
 import os
 import random
 import math
+import time
 from pygame.locals import *
 from pygame import mixer
 
 pygame.init()
 
 # Obrazovka
+
 screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Bubble blast")
 background = pygame.image.load('background.png').convert()
 icon = pygame.image.load('icon.png')
 pygame.display.set_icon(icon)
 
+music = mixer.music.load("background.wav")
+mixer.music.play(-1)
 # Text
 font = pygame.font.Font('Blackbird.ttf', 20)
 over_font = pygame.font.Font('Blackbird.ttf', 70)
 celkove_font = pygame.font.Font('Blackbird.ttf', 40)
+menu_font = pygame.font.Font('Blackbird.ttf', 80)
 
 # Hráč
 player = pygame.image.load('player.png')
@@ -30,15 +35,15 @@ p_changeX = 0
 balon = pygame.image.load('enemy.png')
 balonX = random.randint(0, 736)
 balonY = 0
-b_changeX = 0.3
-b_changeY = 0.3
-pocet_balon = 0  # Zatim nepotřebné potom uděláme seznam a do něho to nahážeme ať máme více balonku
+b_changeX = 2
+b_changeY = 2
+pocet_balon = 5
 
 # Koule ;)
 koule = pygame.image.load('koule.png')
 kouleX = 0
 kouleY = 536
-k_changeY = 1.5
+k_changeY = 5
 nabito = "ready"
 
 # Skore
@@ -89,9 +94,27 @@ def vypis_skrore(x, y):
 
 
 # Smyčka
+menu = True
 running = True
 while running:
 
+    while menu:
+        menuf = menu_font.render("Bubble blast", True, (153, 0, 153))
+        bck = pygame.image.load("1.png")
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                menu = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    menu = False
+        screen.fill((255, 255, 255))
+        screen.blit(bck, (0, 0))
+        screen.blit(menuf, (0, 0))
+        pygame.display.update()
+
+    pygame.mouse.set_visible(0)
     screen.fill((0, 0, 0))
     screen.blit(background, (0, 0))
     # Vstupy hráče
@@ -104,13 +127,18 @@ while running:
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                p_changeX = -0.3
+                p_changeX = -2
             if event.key == pygame.K_RIGHT:
-                p_changeX = 0.3
+                p_changeX = 2
             if event.key == pygame.K_SPACE:
                 if nabito == "ready":
+                    shoot = mixer.Sound("strelba.wav")
+                    shoot.play()
                     kouleX = playerX
                     fire_koule(kouleX, kouleY)
+                    
+            if event.key == pygame.K_p:
+                menu = True
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
@@ -120,13 +148,13 @@ while running:
     balonX += b_changeX
     balonY += b_changeY
     if balonX >= 736:
-        b_changeX = -0.3
+        b_changeX = -2
     if balonX <= 0:
-        b_changeX = 0.3
+        b_changeX = 2
     if balonY >= 536:
-        b_changeY = - 0.3
+        b_changeY = -2
     if balonY <= 0:
-        b_changeY = 0.3
+        b_changeY = 2
 
     # Pohyb
     playerX += p_changeX
@@ -146,6 +174,8 @@ while running:
     # Kolize
     koule_kolize = kolize_koule(balonX, balonY, kouleX, kouleY)
     if koule_kolize:
+        kolize_zvuk = mixer.Sound("boom.wav")
+        kolize_zvuk.play()
         kouleY = 480
         nabito = "ready"
         skore += 1
@@ -155,6 +185,7 @@ while running:
     if hrac_kolize:
         balonY = playerY
         balonX = playerX
+        balon.fill((0, 0, 0, 0))
         konec_hry_text(skore)
         nabito = "konec"
 
@@ -164,3 +195,4 @@ while running:
     vypis_skrore(10, 10)
     # Update obrazovky
     pygame.display.update()
+
