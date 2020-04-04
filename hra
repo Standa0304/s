@@ -17,8 +17,8 @@ background = pygame.image.load('background.png').convert()
 icon = pygame.image.load('icon.png')
 pygame.display.set_icon(icon)
 
-music = mixer.music.load("background.wav")
-mixer.music.play(-1)
+# music = mixer.music.load("background.wav")
+# mixer.music.play(-1)
 # Text
 font = pygame.font.Font('Blackbird.ttf', 20)
 over_font = pygame.font.Font('Blackbird.ttf', 70)
@@ -32,12 +32,18 @@ playerY = 536
 p_changeX = 0
 
 # Balonek
-balon = pygame.image.load('enemy.png')
-balonX = random.randint(0, 736)
-balonY = 0
-b_changeX = 2
-b_changeY = 2
+balon = []
+balonX = []
+balonY = []
+b_changeX = []
+b_changeY = []
 pocet_balon = 5
+for i in range(pocet_balon):
+    balon.append(pygame.image.load('enemy.png'))
+    balonX.append(random.randint(0, 736))
+    balonY.append(0)
+    b_changeX.append(0.4)
+    b_changeY.append(0.4)
 
 # Koule ;)
 koule = pygame.image.load('koule.png')
@@ -55,8 +61,8 @@ def player_move(x, y):
     screen.blit(player, (x, y))
 
 
-def enemy(x, y):
-    screen.blit(balon, (x, y))
+def enemy(x, y, i):
+    screen.blit(balon[i], (x, y))
 
 
 def fire_koule(x, y):
@@ -100,7 +106,7 @@ while running:
 
     while menu:
         menuf = menu_font.render("Bubble blast", True, (153, 0, 153))
-        bck = pygame.image.load("1.png")
+        bck = pygame.image.load("bg.png")
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -127,16 +133,16 @@ while running:
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                p_changeX = -2
+                p_changeX = -0.3
             if event.key == pygame.K_RIGHT:
-                p_changeX = 2
+                p_changeX = 0.3
             if event.key == pygame.K_SPACE:
                 if nabito == "ready":
                     shoot = mixer.Sound("strelba.wav")
                     shoot.play()
                     kouleX = playerX
                     fire_koule(kouleX, kouleY)
-                    
+
             if event.key == pygame.K_p:
                 menu = True
 
@@ -145,16 +151,17 @@ while running:
                 p_changeX = 0
 
     # Balon
-    balonX += b_changeX
-    balonY += b_changeY
-    if balonX >= 736:
-        b_changeX = -2
-    if balonX <= 0:
-        b_changeX = 2
-    if balonY >= 536:
-        b_changeY = -2
-    if balonY <= 0:
-        b_changeY = 2
+    for i in range(pocet_balon):
+        balonX[i] += b_changeX[i]
+        balonY[i] += b_changeY[i]
+        if balonX[i] >= 736:
+            b_changeX[i] = -0.4
+        if balonX[i] <= 0:
+            b_changeX[i] = 0.4
+        if balonY[i] >= 536:
+            b_changeY[i] = -0.4
+        if balonY[i] <= 0:
+            b_changeY[i] = 0.4
 
     # Pohyb
     playerX += p_changeX
@@ -172,26 +179,29 @@ while running:
         kouleY -= k_changeY
 
     # Kolize
-    koule_kolize = kolize_koule(balonX, balonY, kouleX, kouleY)
-    if koule_kolize:
-        kolize_zvuk = mixer.Sound("boom.wav")
-        kolize_zvuk.play()
-        kouleY = 480
-        nabito = "ready"
-        skore += 1
-        balonX = random.randint(0, 735)
-        balonY = 0
-    hrac_kolize = kolize_hrace(balonX, balonY, playerX, playerY)
-    if hrac_kolize:
-        balonY = playerY
-        balonX = playerX
-        balon.fill((0, 0, 0, 0))
-        konec_hry_text(skore)
-        nabito = "konec"
+    for i in range(pocet_balon):
+        koule_kolize = kolize_koule(balonX[i], balonY[i], kouleX, kouleY)
+        if koule_kolize:
+            kolize_zvuk = mixer.Sound("boom.wav")
+            kolize_zvuk.play()
+            kouleY = 480
+            nabito = "ready"
+            skore += 1
+            balonX[i] = random.randint(0, 735)
+            balonY[i] = 0
+        hrac_kolize = kolize_hrace(balonX[i], balonY[i], playerX, playerY)
+        if hrac_kolize:
+            for j in range(pocet_balon):
+                balonY[j] = playerY
+                balonX[j] = playerX
+                balon[j].fill((0, 0, 0, 0))
+            konec_hry_text(skore)
+            nabito = "konec"
+
+        enemy(balonX[i], balonY[i], i)
 
     # Volání funkcí
     player_move(playerX, playerY)
-    enemy(balonX, balonY)
     vypis_skrore(10, 10)
     # Update obrazovky
     pygame.display.update()
