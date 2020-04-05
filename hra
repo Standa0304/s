@@ -37,7 +37,7 @@ balonX = []
 balonY = []
 b_changeX = []
 b_changeY = []
-pocet_balon = 5
+pocet_balon = 6
 for i in range(pocet_balon):
     balon.append(pygame.image.load('enemy.png'))
     balonX.append(random.randint(0, 736))
@@ -103,6 +103,7 @@ def vypis_skrore(x, y):
 menu = True
 running = True
 napoveda_screen = False
+obtiznost = False
 while running:
 
     while menu:
@@ -118,6 +119,7 @@ while running:
                 if mx > 350 and mx < 450 and my > 300 and my < 350:
                     menu = False
                     napoveda_screen = False
+                    obtiznost = True
                 if mx > 350 and mx < 450 and my > 380 and my < 430:
                     menu = False
                     napoveda_screen = True
@@ -171,6 +173,62 @@ while running:
         screen.blit(zacatek, (375, 510))
         pygame.display.update()
 
+    while obtiznost:
+        screen.fill((255, 255, 255))
+        screen.blit(bck, (0, 0))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                menu = False
+                napoveda_screen = False
+                obtiznost = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+                    menu = False
+                    obtiznost = False
+            if event.type == pygame.MOUSEBUTTONUP:
+                mx, my = pygame.mouse.get_pos()
+                if mx > 350 and mx < 450 and my > 250 and my < 300:
+                    obtiznost = False
+                    b_chanyplus = 1
+                    b_chanyminus = -1
+                    b_chanxplus = 1
+                    b_chanxminus = -1
+                    for i in range(pocet_balon):
+                        b_changeX[i] = 1
+                        b_changeY[i] = 1
+                if mx > 350 and mx < 450 and my > 350 and my < 400:
+                    obtiznost = False
+                    b_chanyplus = 2
+                    b_chanyminus = -2
+                    b_chanxplus = 2
+                    b_chanxminus = -2
+                    for i in range(pocet_balon):
+                        b_changeX[i] = 2
+                        b_changeY[i] = 2
+                if mx > 350 and mx < 450 and my > 450 and my < 500:
+                    obtiznost = False
+                    b_chanyplus = 3
+                    b_chanyminus = -3
+                    b_chanxplus = 3
+                    b_chanxminus = -3
+                    for i in range(pocet_balon):
+                        b_changeX[i] = 3
+                        b_changeY[i] = 3
+
+        pygame.draw.rect(screen, (0, 0, 0), pygame.Rect(350, 250, 100, 50), 3)
+        pygame.draw.rect(screen, (0, 0, 0), pygame.Rect(350, 350, 100, 50), 3)
+        pygame.draw.rect(screen, (0, 0, 0), pygame.Rect(350, 450, 100, 50), 3)
+        easy = start_font.render("Easy", True, (0, 0, 0))
+        medium = start_font.render("Medium", True, (0, 0, 0))
+        hard = start_font.render("Hard", True, (0, 0, 0))
+        screen.blit(easy, (370, 260))
+        screen.blit(medium, (362, 360))
+        screen.blit(hard, (375, 460))
+        pygame.display.update()
+
     screen.fill((0, 0, 0))
     screen.blit(background, (0, 0))
     # Vstupy hráče
@@ -195,6 +253,11 @@ while running:
 
             if event.key == pygame.K_p:
                 menu = True
+            if event.key == pygame.K_r:
+                skore = 0
+                for i in range(pocet_balon):
+                    balonX[i] = (random.randint(0, 736))
+                    balonY[i] = 0
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
@@ -205,13 +268,13 @@ while running:
         balonX[i] += b_changeX[i]
         balonY[i] += b_changeY[i]
         if balonX[i] >= 736:
-            b_changeX[i] = -2
+            b_changeX[i] = b_chanxminus
         if balonX[i] <= 0:
-            b_changeX[i] = 2
+            b_changeX[i] = b_chanxplus
         if balonY[i] >= 536:
-            b_changeY[i] = -2
+            b_changeY[i] = b_chanyminus
         if balonY[i] <= 0:
-            b_changeY[i] = 2
+            b_changeY[i] = b_chanyplus
 
     # Pohyb
     playerX += p_changeX
