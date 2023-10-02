@@ -152,6 +152,7 @@ while running:
                 mx, my = pygame.mouse.get_pos()
                 if mx > 350 and mx < 450 and my > 500 and my < 550:
                     napoveda_screen = False
+                    obtiznost = True
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
